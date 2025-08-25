@@ -43,21 +43,33 @@ export default function EntryDetailScreen({ route, navigation }) {
   }, [navigation, tagColor, isEditing]);
 
   const handleSave = async () => {
-    try {
-      const saved = await AsyncStorage.getItem("journalEntries");
-      if (saved) {
-        const entries = JSON.parse(saved);
-        const updatedEntries = entries.map(e => 
-          e.id === entry.id ? { ...e, text: editText.trim() } : e
-        );
-        await AsyncStorage.setItem("journalEntries", JSON.stringify(updatedEntries));
-        setIsEditing(false);
-        onUpdate();
-      }
-    } catch (error) {
-      console.log("Error saving entry:", error);
-    }
-  };
+  const trimmedText = editText.trim();
+  if (!trimmedText) {
+    Alert.alert("Empty Entry", "Please enter some text before saving.");
+    return;
+  }
+
+  try {
+    const saved = await AsyncStorage.getItem("journalEntries");
+    let entries = saved ? JSON.parse(saved) : [];
+
+    // Update the entry
+    entries = entries.map(e =>
+      e.id === entry.id ? { ...e, text: trimmedText, date: new Date().toISOString() } : e
+    );
+
+    await AsyncStorage.setItem("journalEntries", JSON.stringify(entries));
+
+    // Notify previous screen to reload
+    if (onUpdate) onUpdate();
+
+    setIsEditing(false);
+    navigation.goBack(); // optional: go back after saving
+  } catch (error) {
+    console.log("Error saving entry:", error);
+  }
+};
+
 
   const handleDelete = () => {
     Alert.alert(
