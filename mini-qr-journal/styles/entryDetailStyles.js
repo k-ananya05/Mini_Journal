@@ -187,4 +187,25 @@ export default StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  entryImage: {
+    width: 120,
+    height: 120,
+    marginRight: 10,
+    borderRadius: 10,
+  },
+  
+  linkInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    marginVertical: 10,
+    borderRadius: 5,
+  },
+  
+  hyperlink: {
+    color: "blue",
+    textDecorationLine: "underline",
+    marginTop: 5,
+  }
+  
 });
