@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddButton from "../components/AddButton"; // 👈 separate button component
-import styles from "../Styling/Styles";
+import styles from "../styles/styles";
 
 // Helper to get nice date/time
 const formatDateTime = (date) => {
