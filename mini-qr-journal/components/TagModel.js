@@ -1,105 +1,82 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-  FlatList,
-} from "react-native";
-import styles from "../styles/componentStyles";
+import { View, Text, TextInput, TouchableOpacity, Alert, Modal, FlatList } from "react-native";
+import styles from "../styles/homeStyles"; // adjust if you want separate modal styles
 
 export default function TagModal({ visible, onClose, onSubmit, themes }) {
   const [selectedTheme, setSelectedTheme] = useState(null);
-  const [entryText, setEntryText] = useState("");
+  const [tagName, setTagName] = useState("");
 
   const handleSubmit = () => {
-    if (selectedTheme && entryText.trim()) {
-      onSubmit(selectedTheme, entryText.trim());
-      setSelectedTheme(null);
-      setEntryText("");
-      onClose();
+    if (!selectedTheme) {
+      Alert.alert("Select a theme", "Please select a theme for your tag.");
+      return;
     }
-  };
+    if (!tagName.trim()) {
+      Alert.alert("Name required", "You must enter a name for your tag.");
+      return;
+    }
 
-  const handleClose = () => {
+    const tag = {
+      ...selectedTheme,
+      name: tagName.trim(),
+    };
+
+    onSubmit(tag, ""); // You can pass empty string for entry text here
     setSelectedTheme(null);
-    setEntryText("");
+    setTagName("");
     onClose();
   };
 
-  const themeKeys = Object.keys(themes);
-
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={handleClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          {/* Header */}
-          <Text style={styles.modalTitle}>✨ Create New Tag</Text>
-          
-          {/* Entry Text Input */}
-          <TextInput
-            style={styles.entryInput}
-            placeholder="What's on your mind? 💭"
-            value={entryText}
-            onChangeText={setEntryText}
-            multiline={true}
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={{ flex: 1, backgroundColor: "#00000080", justifyContent: "center", padding: 20 }}>
+        <View style={{ backgroundColor: "#fff", borderRadius: 12, padding: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 12 }}>New Tag</Text>
 
           {/* Theme Selection */}
-          <Text style={styles.themeTitle}>Choose a vibe 🎨</Text>
           <FlatList
-            data={themeKeys}
-            numColumns={4}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => {
-              const theme = themes[item];
-              const isSelected = selectedTheme?.name === theme.name;
-              
-              return (
-                <TouchableOpacity
-                  style={[
-                    styles.themeOption,
-                    { backgroundColor: theme.color },
-                    isSelected && styles.selectedTheme
-                  ]}
-                  onPress={() => setSelectedTheme(theme)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.themeEmoji}>{theme.emoji}</Text>
-                  <Text style={styles.themeName}>{theme.name}</Text>
-                </TouchableOpacity>
-              );
+            data={Object.values(themes)}
+            keyExtractor={(item) => item.name}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => setSelectedTheme(item)}
+                style={{
+                  padding: 12,
+                  marginRight: 10,
+                  borderRadius: 8,
+                  borderWidth: selectedTheme?.name === item.name ? 2 : 0,
+                  borderColor: "#000",
+                  backgroundColor: item.color,
+                }}
+              >
+                <Text style={{ fontSize: 20 }}>{item.emoji}</Text>
+              </TouchableOpacity>
+            )}
+          />
+
+          {/* Tag Name Input */}
+          <TextInput
+            placeholder="Enter tag name"
+            value={tagName}
+            onChangeText={setTagName}
+            style={{
+              borderWidth: 1,
+              borderColor: "#ccc",
+              borderRadius: 8,
+              padding: 10,
+              marginTop: 20,
             }}
-            style={styles.themeGrid}
           />
 
           {/* Buttons */}
-          <View style={styles.modalButtons}>
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={handleClose}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+          <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 20 }}>
+            <TouchableOpacity onPress={onClose} style={{ marginRight: 12 }}>
+              <Text style={{ color: "#666", fontSize: 16 }}>Cancel</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[
-                styles.submitButton,
-                (!selectedTheme || !entryText.trim()) && styles.disabledButton
-              ]}
-              onPress={handleSubmit}
-              disabled={!selectedTheme || !entryText.trim()}
-            >
-              <Text style={styles.submitButtonText}>Create Entry</Text>
+            <TouchableOpacity onPress={handleSubmit}>
+              <Text style={{ color: "#4ECDC4", fontSize: 16, fontWeight: "bold" }}>Add</Text>
             </TouchableOpacity>
           </View>
         </View>

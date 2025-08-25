@@ -11,11 +11,12 @@ const formatDateTime = (date) => {
   });
 };
 
-export default function TagCard({ tag, onPress }) {
+export default function TagCard({ tag, onPress, onLongPress }) {
   return (
     <TouchableOpacity 
       style={[styles.tagCard, { borderLeftColor: tag.color }]}
       onPress={onPress}
+      onLongPress={onLongPress} // <-- added for delete functionality
       activeOpacity={0.7}
     >
       <View style={styles.tagCardHeader}>

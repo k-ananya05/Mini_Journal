@@ -4,18 +4,13 @@ import {
   Text,
   TextInput,
   FlatList,
-  TouchableOpacity,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddButton from "../components/AddButton";
 import TagCard from "../components/TagCard";
 import TagModal from "../components/TagModel";
 import styles from "../styles/homeStyles";
-
-// Helper to get nice date/time
-const formatDateTime = (date) => {
-  return new Date(date).toLocaleString();
-};
 
 // Predefined aesthetic themes
 export const THEMES = {
@@ -34,7 +29,7 @@ export default function HomeScreen({ navigation }) {
   const [search, setSearch] = useState("");
   const [showTagModal, setShowTagModal] = useState(false);
 
-  // Load entries on app start
+  // Load entries on mount
   useEffect(() => {
     loadEntries();
   }, []);
@@ -42,9 +37,7 @@ export default function HomeScreen({ navigation }) {
   const loadEntries = async () => {
     try {
       const saved = await AsyncStorage.getItem("journalEntries");
-      if (saved) {
-        setEntries(JSON.parse(saved));
-      }
+      if (saved) setEntries(JSON.parse(saved));
     } catch (error) {
       console.log("Error loading entries:", error);
     }
@@ -80,7 +73,7 @@ export default function HomeScreen({ navigation }) {
           tagCounts[entry.tag.name] = {
             ...entry.tag,
             count: 0,
-            lastEntry: entry.date
+            lastEntry: entry.date,
           };
         }
         tagCounts[entry.tag.name].count++;
@@ -89,16 +82,39 @@ export default function HomeScreen({ navigation }) {
         }
       }
     });
-    return Object.values(tagCounts).sort((a, b) => new Date(b.lastEntry) - new Date(a.lastEntry));
+    return Object.values(tagCounts).sort(
+      (a, b) => new Date(b.lastEntry) - new Date(a.lastEntry)
+    );
   };
 
-  // Filter tags based on search
   const filteredTags = getTagsWithCounts().filter(tag =>
     tag.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleTagPress = (tag) => {
     navigation.navigate('TagEntries', { tag, entries: entries.filter(e => e.tag?.name === tag.name) });
+  };
+
+  // ------------------------------
+  // DELETE TAG FUNCTIONALITY
+  // ------------------------------
+  const handleTagLongPress = (tag) => {
+    Alert.alert(
+      "Delete Tag",
+      `Are you sure you want to delete the tag "${tag.name}" and all its entries?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          onPress: () => {
+            const updatedEntries = entries.filter(e => e.tag?.name !== tag.name);
+            setEntries(updatedEntries);
+            saveEntries(updatedEntries);
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -126,6 +142,7 @@ export default function HomeScreen({ navigation }) {
           <TagCard 
             tag={item} 
             onPress={() => handleTagPress(item)}
+            onLongPress={() => handleTagLongPress(item)} // <-- delete on long press
           />
         )}
         ListEmptyComponent={
