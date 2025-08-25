@@ -130,7 +130,7 @@ export default function HomeScreen({ navigation }) {
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>
-            No entries yet. Add one! 🌸
+            No tags yet. Add one! 🌸
           </Text>
         }
       />

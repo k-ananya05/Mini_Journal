@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import EntryCard from "../components/EntryCard";
+import AddEntryModal from "../components/AddEntryModel";
 import styles from "../styles/tagEntriesStyles";
 
 const formatDateTime = (date) => {
@@ -20,6 +21,7 @@ export default function TagEntriesScreen({ route, navigation }) {
   const [entries, setEntries] = useState([]);
   const [allEntries, setAllEntries] = useState([]);
   const [search, setSearch] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     loadEntries();
@@ -35,6 +37,14 @@ export default function TagEntriesScreen({ route, navigation }) {
       headerTitleStyle: {
         fontWeight: 'bold',
       },
+      headerRight: () => (
+        <TouchableOpacity
+          style={styles.headerAddButton}
+          onPress={() => setShowAddModal(true)}
+        >
+          <Text style={styles.headerAddButtonText}>+ Add</Text>
+        </TouchableOpacity>
+      ),
     });
   }, [navigation, tag]);
 
@@ -45,7 +55,7 @@ export default function TagEntriesScreen({ route, navigation }) {
         const allEntries = JSON.parse(saved);
         setAllEntries(allEntries);
         const tagEntries = allEntries.filter(entry => entry.tag?.name === tag.name);
-        setEntries(tagEntries);
+        setEntries(tagEntries.sort((a, b) => new Date(b.date) - new Date(a.date)));
       }
     } catch (error) {
       console.log("Error loading entries:", error);
@@ -58,6 +68,22 @@ export default function TagEntriesScreen({ route, navigation }) {
     } catch (error) {
       console.log("Error saving entries:", error);
     }
+  };
+
+  const addEntry = (entryText) => {
+    const newEntry = {
+      id: Date.now().toString(),
+      tag: tag,
+      text: entryText,
+      date: new Date().toISOString(),
+    };
+    
+    const updatedAllEntries = [newEntry, ...allEntries];
+    const updatedTagEntries = [newEntry, ...entries];
+    
+    setAllEntries(updatedAllEntries);
+    setEntries(updatedTagEntries);
+    saveEntries(updatedAllEntries);
   };
 
   const deleteEntry = (entryId) => {
@@ -112,6 +138,15 @@ export default function TagEntriesScreen({ route, navigation }) {
         onChangeText={setSearch}
       />
 
+      {/* Add Entry Button - Floating style */}
+      <TouchableOpacity 
+        style={[styles.addEntryButton, { backgroundColor: tag.color }]}
+        onPress={() => setShowAddModal(true)}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.addEntryButtonText}>✨ Add New Entry</Text>
+      </TouchableOpacity>
+
       {/* Entries List */}
       <FlatList
         data={filteredEntries}
@@ -125,11 +160,21 @@ export default function TagEntriesScreen({ route, navigation }) {
           />
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No entries in this tag yet 🌸
-          </Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No entries in this tag yet 🌸</Text>
+            <Text style={styles.emptySubtext}>Tap the button above to add your first entry!</Text>
+          </View>
         }
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+
+      {/* Add Entry Modal */}
+      <AddEntryModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={addEntry}
+        tag={tag}
       />
     </View>
   );
