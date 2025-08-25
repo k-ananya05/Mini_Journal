@@ -23,7 +23,7 @@ export default function App() {
         <Stack.Screen
           name="TagEntries"
           component={TagEntriesScreen}
-          options={({ route }) => ({ title: route.params.tag.emoji + " " + route.params.tag.name })}
+          options={{ title: "Tag Entries" }}  
         />
         <Stack.Screen
           name="EntryDetail"
