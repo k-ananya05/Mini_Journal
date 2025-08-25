@@ -12,39 +12,25 @@ import EntryCard from "../components/EntryCard";
 import AddEntryModal from "../components/AddEntryModel";
 import styles from "../styles/tagEntriesStyles";
 
-const formatDateTime = (date) => {
-  return new Date(date).toLocaleString();
-};
-
 export default function TagEntriesScreen({ route, navigation }) {
-  const { tag } = route.params;
+  const { tag } = route?.params || {}; // safe access
   const [entries, setEntries] = useState([]);
   const [allEntries, setAllEntries] = useState([]);
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
 
+  // Load entries on mount
   useEffect(() => {
     loadEntries();
   }, []);
 
+  // Update header with tag emoji + name
   useEffect(() => {
     navigation.setOptions({
-      title: `${tag.emoji} ${tag.name}`,
-      headerStyle: {
-        backgroundColor: tag.color,
-      },
-      headerTintColor: '#fff',
-      headerTitleStyle: {
-        fontWeight: 'bold',
-      },
-      headerRight: () => (
-        <TouchableOpacity
-          style={styles.headerAddButton}
-          onPress={() => setShowAddModal(true)}
-        >
-          <Text style={styles.headerAddButtonText}>+ Add</Text>
-        </TouchableOpacity>
-      ),
+      title: `${tag?.emoji ?? "📝"} ${tag?.name ?? "Entries"}`,
+      headerStyle: { backgroundColor: tag?.color ?? "#b5e0d7" },
+      headerTintColor: "#fff",
+      headerTitleStyle: { fontWeight: "bold" },
     });
   }, [navigation, tag]);
 
@@ -54,8 +40,16 @@ export default function TagEntriesScreen({ route, navigation }) {
       if (saved) {
         const allEntries = JSON.parse(saved);
         setAllEntries(allEntries);
-        const tagEntries = allEntries.filter(entry => entry.tag?.name === tag.name);
-        setEntries(tagEntries.sort((a, b) => new Date(b.date) - new Date(a.date)));
+
+        // Filter by current tag
+        const tagEntries = allEntries.filter(
+          (entry) => entry.tag?.name === tag?.name
+        );
+
+        // Sort newest first
+        setEntries(
+          tagEntries.sort((a, b) => new Date(b.date) - new Date(a.date))
+        );
       }
     } catch (error) {
       console.log("Error loading entries:", error);
@@ -77,10 +71,10 @@ export default function TagEntriesScreen({ route, navigation }) {
       text: entryText,
       date: new Date().toISOString(),
     };
-    
+
     const updatedAllEntries = [newEntry, ...allEntries];
     const updatedTagEntries = [newEntry, ...entries];
-    
+
     setAllEntries(updatedAllEntries);
     setEntries(updatedTagEntries);
     saveEntries(updatedAllEntries);
@@ -91,43 +85,43 @@ export default function TagEntriesScreen({ route, navigation }) {
       "Delete Entry",
       "Are you sure you want to delete this entry?",
       [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            const updatedAllEntries = allEntries.filter(entry => entry.id !== entryId);
+            const updatedAllEntries = allEntries.filter(
+              (entry) => entry.id !== entryId
+            );
             setAllEntries(updatedAllEntries);
-            setEntries(entries.filter(entry => entry.id !== entryId));
+            setEntries(entries.filter((entry) => entry.id !== entryId));
             saveEntries(updatedAllEntries);
-          }
-        }
+          },
+        },
       ]
     );
   };
 
   const handleEntryPress = (entry) => {
-    navigation.navigate('EntryDetail', { 
-      entry, 
+    navigation.navigate("EntryDetail", {
+      entry,
       onUpdate: loadEntries,
-      tagColor: tag.color 
+      tagColor: tag?.color,
     });
   };
 
   // Filter entries based on search
-  const filteredEntries = entries.filter(entry =>
-    entry.text.toLowerCase().includes(search.toLowerCase())
+  const filteredEntries = entries.filter((entry) =>
+    (entry.text || "").toLowerCase().includes((search || "").toLowerCase())
   );
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: tag.color }]}>
-        <Text style={styles.headerTitle}>{tag.emoji} {tag.name}</Text>
-        <Text style={styles.headerSubtitle}>{entries.length} entries</Text>
+      <View style={[styles.header, { backgroundColor: tag?.color ?? "#b5e0d7" }]}>
+        <Text style={styles.headerTitle}>
+          {tag?.emoji ?? "📝"} {tag?.name ?? "Entries"}
+        </Text>
       </View>
 
       {/* Search Bar */}
@@ -138,9 +132,9 @@ export default function TagEntriesScreen({ route, navigation }) {
         onChangeText={setSearch}
       />
 
-      {/* Add Entry Button - Floating style */}
-      <TouchableOpacity 
-        style={[styles.addEntryButton, { backgroundColor: tag.color }]}
+      {/* Add Entry Button */}
+      <TouchableOpacity
+        style={[styles.addEntryButton, { backgroundColor: tag?.color ?? "#b5e0d7" }]}
         onPress={() => setShowAddModal(true)}
         activeOpacity={0.8}
       >
@@ -156,13 +150,15 @@ export default function TagEntriesScreen({ route, navigation }) {
             entry={item}
             onPress={() => handleEntryPress(item)}
             onDelete={() => deleteEntry(item.id)}
-            tagColor={tag.color}
+            tagColor={tag?.color ?? "#b5e0d7"}
           />
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No entries in this tag yet 🌸</Text>
-            <Text style={styles.emptySubtext}>Tap the button above to add your first entry!</Text>
+            <Text style={styles.emptySubtext}>
+              Tap the button above to add your first entry!
+            </Text>
           </View>
         }
         contentContainerStyle={styles.listContent}
