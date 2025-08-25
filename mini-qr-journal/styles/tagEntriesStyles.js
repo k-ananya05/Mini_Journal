@@ -63,12 +63,58 @@ export default StyleSheet.create({
     flexGrow: 1,
   },
 
+  // Header Add Button
+  headerAddButton: {
+    marginRight: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 8,
+  },
+  headerAddButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+
+  // Add Entry Button
+  addEntryButton: {
+    marginHorizontal: 20,
+    marginVertical: 15,
+    padding: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  addEntryButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
   // Empty State
+  emptyContainer: {
+    alignItems: "center",
+    marginTop: 50,
+  },
   emptyText: {
     textAlign: "center",
-    marginTop: 50,
     color: "#999",
     fontSize: 16,
+    fontStyle: "italic",
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    textAlign: "center",
+    color: "#bbb",
+    fontSize: 14,
     fontStyle: "italic",
   },
 });

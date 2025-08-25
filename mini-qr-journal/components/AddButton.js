@@ -8,10 +8,10 @@ export default function AddButton({ onPress }) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.addButton,
-        { backgroundColor: pressed ? "#8cbcb4" : "#a3d2ca" }, // 👈 lighter when pressed
+        { backgroundColor: pressed ? "#8cbcb4" : "#a3d2ca" }, // same color scheme, darker when pressed
       ]}
     >
-      <Text style={styles.addButtonText}>+ Add Dummy Entry</Text>
+      <Text style={styles.addButtonText}>+ Add Tag</Text>
     </Pressable>
   );
 }

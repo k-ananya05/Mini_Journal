@@ -194,6 +194,36 @@ export default StyleSheet.create({
     textShadowRadius: 2,
   },
 
+  // AddEntryModal Styles
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 20,
+  },
+  modalHeaderEmoji: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  modalHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  addEntryInput: {
+    borderWidth: 1.5,
+    borderColor: "#e1e1e1",
+    borderRadius: 12,
+    padding: 15,
+    fontSize: 16,
+    textAlignVertical: "top",
+    backgroundColor: "#fafafa",
+    marginBottom: 20,
+    minHeight: 150,
+  },
+
   // Modal Buttons
   modalButtons: {
     flexDirection: "row",

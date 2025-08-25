@@ -41,7 +41,7 @@ export default function TagModal({ visible, onClose, onSubmit, themes }) {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           {/* Header */}
-          <Text style={styles.modalTitle}>✨ Create New Entry</Text>
+          <Text style={styles.modalTitle}>✨ Create New Tag</Text>
           
           {/* Entry Text Input */}
           <TextInput
