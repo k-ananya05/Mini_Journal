@@ -23,6 +23,21 @@ export default function EntryDetailScreen({ route, navigation }) {
   const [images, setImages] = useState(entry.images || []);
   const [linkText, setLinkText] = useState(entry.link || "");
 
+  // Universal button size
+  const buttonSize = 120; // width and height
+  const buttonStyle = {
+    width: buttonSize,
+    height: buttonSize,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  };
+
   useEffect(() => {
     navigation.setOptions({
       title: "Entry Details",
@@ -66,7 +81,6 @@ export default function EntryDetailScreen({ route, navigation }) {
       );
 
       await AsyncStorage.setItem("journalEntries", JSON.stringify(entries));
-
       if (onUpdate) onUpdate();
       setIsEditing(false);
       navigation.goBack();
@@ -133,6 +147,14 @@ export default function EntryDetailScreen({ route, navigation }) {
     setImages(images.filter((img) => img !== uri));
   };
 
+  const qrValue = JSON.stringify({
+    text: entry.text,
+    images: entry.images || [],
+    link: entry.link || "",
+    date: entry.date,
+    tag: entry.tag,
+  });
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header */}
@@ -156,7 +178,6 @@ export default function EntryDetailScreen({ route, navigation }) {
               textAlignVertical="top"
               autoFocus
             />
-
             <TextInput
               style={styles.linkInput}
               placeholder="Add a hyperlink (optional)"
@@ -164,14 +185,12 @@ export default function EntryDetailScreen({ route, navigation }) {
               onChangeText={setLinkText}
               keyboardType="url"
             />
-
             <TouchableOpacity
               style={[styles.saveButton, { backgroundColor: tagColor, marginTop: 10 }]}
               onPress={pickImage}
             >
               <Text style={styles.saveButtonText}>📷 Add Image</Text>
             </TouchableOpacity>
-
             <ScrollView horizontal style={{ marginTop: 10 }}>
               {images.map((uri, index) => (
                 <View key={index} style={{ marginRight: 10 }}>
@@ -189,7 +208,6 @@ export default function EntryDetailScreen({ route, navigation }) {
         ) : (
           <>
             <Text style={styles.entryText}>{entry.text}</Text>
-
             {images.length > 0 && (
               <ScrollView horizontal style={{ marginTop: 10 }}>
                 {images.map((uri, index) => (
@@ -197,44 +215,65 @@ export default function EntryDetailScreen({ route, navigation }) {
                 ))}
               </ScrollView>
             )}
-
-            {linkText ? (
-              <Text
-                style={styles.hyperlink}
-                onPress={() => Linking.openURL(linkText)}
-              >
+            {linkText && (
+              <Text style={styles.hyperlink} onPress={() => Linking.openURL(linkText)}>
                 {linkText}
               </Text>
-            ) : null}
+            )}
           </>
         )}
       </View>
 
       {/* Action Buttons */}
-      {isEditing ? (
+      {!isEditing && (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 20,
+            marginHorizontal: 20,
+          }}
+        >
+          <TouchableOpacity
+            style={[buttonStyle, { backgroundColor: tagColor }]}
+            onPress={() => setIsEditing(true)}
+          >
+            <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>
+              ✏️ Edit
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[buttonStyle, { backgroundColor: "#FFF8E7" }]}
+            onPress={() => navigation.navigate("QRScreen", { qrValue, tagColor })}
+          >
+            <Text style={{ color: "black", fontWeight: "700", fontSize: 16 }}>
+              🔗 QR
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[buttonStyle, { backgroundColor: "#ff6b6b" }]}
+            onPress={handleDelete}
+          >
+            <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>
+              🗑️ Delete
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Editing buttons (Cancel/Save) */}
+      {isEditing && (
         <View style={styles.editButtons}>
           <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.saveButton, { backgroundColor: tagColor }]}
             onPress={handleSave}
           >
             <Text style={styles.saveButtonText}>Save Changes</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.editButton, { backgroundColor: tagColor }]}
-            onPress={() => setIsEditing(true)}
-          >
-            <Text style={styles.editButtonText}>✏️ Edit</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-            <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
           </TouchableOpacity>
         </View>
       )}
