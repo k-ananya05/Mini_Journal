@@ -32,7 +32,7 @@ export default function App() {
           options={{ title: "Your Entry ✨" }}
         />
         <Stack.Screen
-          name="QRScreen"
+          name="QRCodeScreen"
           component={QRScreen} // ✅ Add QR screen here
           options={{ headerShown: false }} // optional: full-screen QR
         />

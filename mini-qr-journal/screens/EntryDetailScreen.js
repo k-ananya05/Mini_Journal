@@ -1,3 +1,4 @@
+// EntryDetailScreen.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -147,13 +148,30 @@ export default function EntryDetailScreen({ route, navigation }) {
     setImages(images.filter((img) => img !== uri));
   };
 
-  const qrValue = JSON.stringify({
-    text: entry.text,
-    images: entry.images || [],
-    link: entry.link || "",
-    date: entry.date,
-    tag: entry.tag,
-  });
+  // NEW: Function to send entry to backend and get PDF URL
+  const handleGenerateQR = async () => {
+    try {
+      const resp = await fetch("https://pointless-quadruplication-slyvia.ngrok-free.dev/entries",  {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: entry.text,
+          notes: "",
+          images: entry.images || [],
+          link: entry.link || "",
+        }),
+      });
+
+      if (!resp.ok) {
+        throw new Error("Failed to generate PDF");
+      }
+
+      const data = await resp.json(); // { id, pdfUrl }
+      navigation.navigate("QRCodeScreen", { qrValue: data.pdfUrl, tagColor });
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -245,7 +263,7 @@ export default function EntryDetailScreen({ route, navigation }) {
 
           <TouchableOpacity
             style={[buttonStyle, { backgroundColor: "#FFF8E7" }]}
-            onPress={() => navigation.navigate("QRScreen", { qrValue, tagColor })}
+            onPress={handleGenerateQR} // UPDATED: backend QR
           >
             <Text style={{ color: "black", fontWeight: "700", fontSize: 16 }}>
               🔗 QR

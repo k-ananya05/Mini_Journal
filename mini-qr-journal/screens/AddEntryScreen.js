@@ -1,15 +1,31 @@
+// AddEntryScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Button } from 'react-native';
+import { View, TextInput, Button, Alert } from 'react-native';
 
 export default function AddEntryScreen({ route, navigation }) {
   const { setEntries } = route.params;
   const [text, setText] = useState('');
 
   const handleSave = () => {
-    setEntries(prev => [
-      ...prev,
-      { id: Date.now().toString(), text, date: new Date().toISOString().split('T')[0] }
-    ]);
+    if (!text.trim()) {
+      Alert.alert("Validation", "Please write something before saving!");
+      return;
+    }
+
+    const entry = {
+      id: Date.now().toString(),
+      text,
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    // Save entry to parent state
+    setEntries(prev => [...prev, entry]);
+
+    // Optionally show success message
+    Alert.alert("Saved", "Entry saved successfully!");
+
+    // Clear input or navigate back
+    setText('');
     navigation.goBack();
   };
 
@@ -24,7 +40,9 @@ export default function AddEntryScreen({ route, navigation }) {
           borderColor: '#ccc',
           padding: 10,
           marginBottom: 20,
-          height: 100
+          height: 100,
+          borderRadius: 8,
+          textAlignVertical: "top"
         }}
         multiline
       />
