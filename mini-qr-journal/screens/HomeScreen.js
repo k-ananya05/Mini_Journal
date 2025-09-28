@@ -5,6 +5,9 @@ import {
   TextInput,
   FlatList,
   Alert,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddButton from "../components/AddButton";
@@ -29,6 +32,11 @@ export default function HomeScreen({ navigation }) {
   const [search, setSearch] = useState("");
   const [showTagModal, setShowTagModal] = useState(false);
 
+  // AI modal state
+  const [aiVisible, setAiVisible] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+
   // Load entries on mount
   useEffect(() => {
     loadEntries();
@@ -45,13 +53,15 @@ export default function HomeScreen({ navigation }) {
 
   const saveEntries = async (newEntries) => {
     try {
-      await AsyncStorage.setItem("journalEntries", JSON.stringify(newEntries));
+      await AsyncStorage.setItem(
+        "journalEntries",
+        JSON.stringify(newEntries)
+      );
     } catch (error) {
       console.log("Error saving entries:", error);
     }
   };
 
-  // Add new entry with selected tag
   const addEntry = (selectedTag, entryText) => {
     const newEntry = {
       id: Date.now().toString(),
@@ -64,10 +74,9 @@ export default function HomeScreen({ navigation }) {
     saveEntries(updated);
   };
 
-  // Group entries by tags
   const getTagsWithCounts = () => {
     const tagCounts = {};
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       if (entry.tag) {
         if (!tagCounts[entry.tag.name]) {
           tagCounts[entry.tag.name] = {
@@ -87,34 +96,77 @@ export default function HomeScreen({ navigation }) {
     );
   };
 
-  const filteredTags = getTagsWithCounts().filter(tag =>
+  const filteredTags = getTagsWithCounts().filter((tag) =>
     tag.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleTagPress = (tag) => {
-    navigation.navigate('TagEntries', { tag, entries: entries.filter(e => e.tag?.name === tag.name) });
+    navigation.navigate("TagEntries", {
+      tag,
+      entries: entries.filter((e) => e.tag?.name === tag.name),
+    });
   };
 
-  // ------------------------------
-  // DELETE TAG FUNCTIONALITY
-  // ------------------------------
   const handleTagLongPress = (tag) => {
     Alert.alert(
       "Delete Tag",
       `Are you sure you want to delete the tag "${tag.name}" and all its entries?`,
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Delete", 
-          style: "destructive", 
+        {
+          text: "Delete",
+          style: "destructive",
           onPress: () => {
-            const updatedEntries = entries.filter(e => e.tag?.name !== tag.name);
+            const updatedEntries = entries.filter(
+              (e) => e.tag?.name !== tag.name
+            );
             setEntries(updatedEntries);
             saveEntries(updatedEntries);
-          }
-        }
+          },
+        },
       ]
     );
+  };
+
+  // ------------------------------
+  // AI QUERY HANDLER
+  // ------------------------------
+  const handleAskAI = async () => {
+    if (!question) return setAnswer("Please enter a question first.");
+
+    try {
+      const resp = await fetch("http://192.168.0.176:3001/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `${question}\n\nHere are the journal entries:\n${JSON.stringify(
+            entries
+          )}`,
+        }),
+      });
+
+      const data = await resp.json();
+      setAnswer(data.result || "No response from AI");
+    } catch (err) {
+      console.error(err);
+      setAnswer("Error contacting AI 😔");
+    }
+  };
+
+  // Button styling
+  const buttonSize = 120;
+  const buttonStyle = {
+    width: buttonSize,
+    height: buttonSize,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    marginHorizontal: 5,
   };
 
   return (
@@ -139,16 +191,14 @@ export default function HomeScreen({ navigation }) {
         data={filteredTags}
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <TagCard 
-            tag={item} 
+          <TagCard
+            tag={item}
             onPress={() => handleTagPress(item)}
-            onLongPress={() => handleTagLongPress(item)} // <-- delete on long press
+            onLongPress={() => handleTagLongPress(item)}
           />
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No tags yet. Add one! 🌸
-          </Text>
+          <Text style={styles.emptyText}>No tags yet. Add one! 🌸</Text>
         }
       />
 
@@ -159,6 +209,71 @@ export default function HomeScreen({ navigation }) {
         onSubmit={addEntry}
         themes={THEMES}
       />
+
+      {/* Bottom Bar */}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          padding: 15,
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <TouchableOpacity
+          style={[buttonStyle, { backgroundColor: "#6c63ff" }]}
+          onPress={() => setAiVisible(true)}
+        >
+          <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>
+            🤖 AI
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* AI Modal */}
+      <Modal visible={aiVisible} animationType="slide">
+        <View style={{ flex: 1, padding: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+            Ask about your journal
+          </Text>
+          <TextInput
+            style={styles.search}
+            placeholder="Ask something about your entries..."
+            value={question}
+            onChangeText={setQuestion}
+          />
+          <TouchableOpacity
+            style={[
+              buttonStyle,
+              {
+                backgroundColor: "#6c63ff",
+                alignSelf: "center",
+                marginTop: 10,
+              },
+            ]}
+            onPress={handleAskAI}
+          >
+            <Text
+              style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}
+            >
+              Ask AI
+            </Text>
+          </TouchableOpacity>
+          <ScrollView style={{ marginTop: 20 }}>
+            <Text>{answer}</Text>
+          </ScrollView>
+          <TouchableOpacity
+            style={[
+              buttonStyle,
+              { backgroundColor: "#ff6b6b", alignSelf: "center", marginTop: 20 },
+            ]}
+            onPress={() => setAiVisible(false)}
+          >
+            <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>
+              Close
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }

@@ -62,5 +62,83 @@ export default StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  
+
+  // ----------------------
+  // NEW: AI Bottom Bar
+  // ----------------------
+  aiBar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 15,
+    backgroundColor: "#f9f9f9",
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
+  },
+  aiButton: {
+    flex: 1,
+    marginHorizontal: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#6c63ff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  aiButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+
+  // ----------------------
+  // NEW: AI Modal
+  // ----------------------
+  modalContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#333",
+  },
+  modalInput: {
+    borderWidth: 1.5,
+    borderColor: "#e1e1e1",
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: "#fafafa",
+    marginBottom: 15,
+  },
+  askButton: {
+    backgroundColor: "#6c63ff",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  askButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  closeButton: {
+    backgroundColor: "#ccc",
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 15,
+  },
+  closeButtonText: {
+    color: "#333",
+    fontWeight: "600",
+    fontSize: 15,
+  },
 });
